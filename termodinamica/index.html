@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Documento tecnico de la Calculadora Termodinamica: separacion entre el calculo con CoolProp y la explicacion con modelo de lenguaje.">
+<meta name="description" content="Documento tecnico de la Calculadora Termodinamica: regiones del agua y sus variables independientes, validacion de vapor sobrecalentado, modelo de gas ideal con referencias declaradas, y la separacion entre calculo y explicacion.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8C%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <title>Calculadora Termodinámica — Documento técnico</title>
@@ -377,11 +377,11 @@ footer{
 
 <header class="masthead">
   <p class="kicker">Calculadora Termodinámica — Documento técnico</p>
-  <h1>La IA explica, la librería calcula</h1>
-  <p class="lede">Una calculadora de propiedades termodinámicas donde el modelo de lenguaje nunca produce un número. Este documento trata de por qué esa separación es el diseño y no una precaución, y de qué se necesita para sostenerla.</p>
+  <h1>Una calculadora que corrige al estudiante en vez de obedecerlo</h1>
+  <p class="lede">Tres regiones del agua y del aire, cada una con las variables que de verdad la determinan. Qué pasa cuando alguien pide vapor sobrecalentado a una temperatura que no lo es, por qué en saturación la presión no es un dato de entrada, y por qué el modelo de lenguaje explica pero nunca calcula.</p>
   <div class="meta-row">
-    <span><b>Cálculo</b> · CoolProp</span>
-    <span><b>Explicación</b> · modelo de lenguaje, sobre resultados ya calculados</span>
+    <span><b>Propiedades</b> · CoolProp</span>
+    <span><b>Regiones</b> · saturado · sobrecalentado · gas ideal</span>
     <span><b>Unidades</b> · internacional e inglés</span>
     <span><b>Despliegue</b> · función serverless + cliente web</span>
   </div>
@@ -391,10 +391,12 @@ footer{
   <p class="toc-label">Contenido</p>
   <ol>
     <li><a href="#s1"><span>01</span>Qué hace</a></li>
-    <li><a href="#s2"><span>02</span>La separación</a></li>
-    <li><a href="#s3"><span>03</span>Por qué importa aquí</a></li>
-    <li><a href="#s4"><span>04</span>Unidades</a></li>
-    <li><a href="#s5"><span>05</span>Arquitectura</a></li>
+    <li><a href="#s2"><span>02</span>Saturación</a></li>
+    <li><a href="#s3"><span>03</span>Vapor sobrecalentado</a></li>
+    <li><a href="#s4"><span>04</span>Gas ideal</a></li>
+    <li><a href="#s5"><span>05</span>Unidades</a></li>
+    <li><a href="#s6"><span>06</span>La IA explica, no calcula</a></li>
+    <li><a href="#s7"><span>07</span>Arquitectura</a></li>
   </ol>
 </nav>
 
@@ -404,18 +406,125 @@ footer{
 <section id="s1">
   <span class="sec-num">01</span>
   <h2>Qué hace</h2>
-  <p class="intro">Dado un <strong>estado</strong>, una <strong>temperatura</strong> y una <strong>presión</strong>, devuelve las propiedades termodinámicas del fluido: volumen específico, energía interna, entalpía y entropía.</p>
+  <p class="intro">Dado un <strong>estado</strong>, una temperatura y una presión, devuelve las propiedades termodinámicas: volumen específico, energía interna, entalpía y entropía. El cálculo lo hace <strong>CoolProp</strong>, la librería de propiedades de fluidos que se usa en ingeniería.</p>
 
-  <p>El cálculo lo hace <strong>CoolProp</strong>, la librería de propiedades de fluidos que se usa en ingeniería. No hay fórmulas reimplementadas ni tablas interpoladas a mano: la herramienta consulta la misma fuente que usaría un cálculo profesional.</p>
+  <p>Pero la herramienta no se limita a consultar. La decisión que la separa de una tabla en línea es que <strong>cada región tiene sus propias variables independientes</strong>, y la calculadora lo hace cumplir en vez de aceptar cualquier par de números.</p>
 
-  <p>Lo que añade es la segunda mitad: una <strong>explicación en lenguaje natural</strong> de esos mismos resultados — de dónde salen, qué significan físicamente, y cómo se obtendrían con tablas termodinámicas, incluida la interpolación cuando hace falta.</p>
+  <div class="tw">
+    <table class="data">
+      <thead><tr><th>Región</th><th>Qué la determina</th><th>Qué devuelve</th></tr></thead>
+      <tbody>
+        <tr><td><b>Agua saturada</b></td><td>Solo la temperatura. La presión <b>queda fijada</b> por ella</td><td>La tabla completa de saturación: propiedades del líquido, del vapor y las diferencias</td></tr>
+        <tr><td><b>Vapor sobrecalentado</b></td><td>Temperatura <b>y</b> presión, con la condición de estar realmente en esa región</td><td>Las cuatro propiedades del estado</td></tr>
+        <tr><td><b>Gas ideal (aire)</b></td><td>Temperatura y presión, sin restricción de región</td><td>Las cuatro, desde el modelo analítico</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout rule">
+    <div class="c-title">El criterio pedagógico</div>
+    <p>Un estudiante que se equivoca de región no comete un error de tecleo: <strong>tiene un malentendido</strong>. Una calculadora que le devuelve un número igualmente le confirma el malentendido con un resultado de aspecto correcto. Aquí, en vez de eso, se le dice dónde está el límite.</p>
+  </div>
 </section>
 
 <!-- ══════════════ 2 ══════════════ -->
 <section id="s2">
   <span class="sec-num">02</span>
-  <h2>La separación</h2>
-  <p class="intro">Son <strong>dos endpoints distintos</strong>, y esa división es la decisión de diseño central.</p>
+  <h2>Saturación</h2>
+  <p class="intro">En la campana de saturación, líquido y vapor coexisten, y eso quita un grado de libertad: <strong>fijada la temperatura, la presión ya no se puede elegir</strong>.</p>
+
+  <div class="callout">
+    <div class="c-title">La presión que escribe el usuario se ignora, a propósito</div>
+    <p>La calculadora obtiene la <strong>presión de saturación real</strong> a esa temperatura y la muestra. No es que descarte el dato del usuario por comodidad: es que en esa región la presión <em>no es un dato independiente</em>. Mostrar la que el estudiante escribió sería presentar como estado algo que no puede existir.</p>
+  </div>
+
+  <div class="formula energy">
+    <div class="f-head"><span class="f-name">Lo que devuelve</span><span class="chip">Tabla de saturación completa</span></div>
+    <div class="f-eq">Líquido saturado      Vf   Uf   Hf   Sf
+Vapor saturado        Vg   Ug   Hg   Sg
+─────────────────────────────────────────
+Diferencias           Ufg = Ug − Uf
+                      Hfg = Hg − Hf     (calor latente)
+                      Sfg = Sg − Sf</div>
+    <div class="f-note">Las tres diferencias no se piden por separado a la librería: se calculan restando, que es exactamente como se obtienen de una tabla impresa. <strong>Hfg es el calor de vaporización</strong>, y verlo junto a los dos extremos de los que sale es lo que hace que el estudiante entienda de dónde viene.</div>
+  </div>
+
+  <p>El volumen específico se obtiene invirtiendo la densidad que devuelve la librería, porque las tablas termodinámicas trabajan con volumen específico y no con densidad. Es una conversión trivial, y hacerla dentro evita que el estudiante tenga que traducir entre lo que le da la herramienta y lo que dice su libro.</p>
+</section>
+
+<!-- ══════════════ 3 ══════════════ -->
+<section id="s3">
+  <span class="sec-num">03</span>
+  <h2>Vapor sobrecalentado</h2>
+  <p class="intro">Aquí temperatura y presión sí son independientes — <strong>pero solo si el punto está realmente en esa región</strong>. Y ese es el error más común de quien está aprendiendo.</p>
+
+  <div class="formula crit">
+    <div class="f-head"><span class="f-name">La validación</span></div>
+    <div class="f-eq">si  P < P crítica:
+      T_sat = temperatura de saturación a esa presión
+      si  T ≤ T_sat + 0,05 K  →  no es vapor sobrecalentado</div>
+    <div class="f-note">El margen de 0,05 K evita rechazar un punto que está sobre la línea de saturación por redondeo. Y la comprobación <strong>solo aplica por debajo del punto crítico</strong>: por encima no hay línea de saturación que cruzar, así que exigirla sería inventar un límite que no existe.</div>
+  </div>
+
+  <div class="callout rule">
+    <div class="c-title">Un error que enseña</div>
+    <p>El mensaje no dice «datos inválidos». Dice, con los números del caso concreto:</p>
+    <p class="mono" style="font-size:13.5px">A 100,0 kPa el agua se satura a 99,6 °C. La temperatura ingresada (80,0 °C) no es vapor sobrecalentado: debe ser mayor a 99,6 °C.</p>
+    <p>Ahí hay tres cosas que el estudiante necesitaba: <strong>cuál es la frontera</strong> a su presión, <strong>de qué lado cayó</strong>, y <strong>qué tendría que cambiar</strong>. Un mensaje genérico le habría dicho que se equivocó sin decirle en qué, que es la forma más rápida de que abandone la herramienta y vuelva a la tabla del libro.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 4 ══════════════ -->
+<section id="s4">
+  <span class="sec-num">04</span>
+  <h2>Gas ideal</h2>
+  <p class="intro">Para el aire se usa el modelo de <strong>gas ideal con calores específicos constantes</strong> — la aproximación de aire frío estándar. No se consulta la librería: se aplican las expresiones analíticas.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">El modelo</span><span class="chip norm">Aire frío estándar</span></div>
+    <div class="f-eq">v = R·T / P
+
+u = cv · T
+h = cp · T
+
+s = cp · ln(T/T₀) − R · ln(P/P₀)</div>
+    <div class="f-note">Con R, cp y cv constantes del aire. Es deliberado que aquí no intervenga la librería: el estudiante está aprendiendo <strong>este</strong> modelo, y la gracia es ver que las cuatro propiedades salen de tres constantes y dos logaritmos.</div>
+  </div>
+
+  <div class="callout">
+    <div class="c-title">Las referencias están declaradas, y eso no es un detalle</div>
+    <p>La energía interna y la entalpía se toman <strong>nulas a 0 K</strong>, y la entropía <strong>nula en el estado de referencia</strong> de temperatura y presión ambiente.</p>
+    <p>Ninguna de las tres tiene un cero absoluto físico: solo tienen sentido las <em>diferencias</em>. Un estudiante que compare la entalpía de esta herramienta con la de una tabla que usa otra referencia obtendrá números distintos y creerá que una de las dos está mal. Por eso las referencias se escriben, en vez de dejarlas implícitas en el código.</p>
+  </div>
+
+  <p>Nótese además que la entropía es la única que depende de la presión. Es la diferencia estructural entre ella y las otras dos en el modelo de gas ideal, y verla en la fórmula la explica mejor que un párrafo.</p>
+</section>
+
+<!-- ══════════════ 5 ══════════════ -->
+<section id="s5">
+  <span class="sec-num">05</span>
+  <h2>Unidades</h2>
+  <p class="intro">Acepta y convierte entre <strong>sistema internacional e inglés</strong>. Es donde más se equivoca quien está aprendiendo, y donde el error es más difícil de ver.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">La conversión, en un solo punto</span></div>
+    <div class="f-eq">energía y entropía   J/kg  →  kJ/kg      (siempre, antes de nada)
+                     kJ/kg →  BTU/lb     (si es sistema inglés)
+
+temperatura          K     →  °F
+presión              Pa    →  psi
+volumen              m³/kg →  ft³/lb</div>
+    <div class="f-note">La librería trabaja en unidades base del SI; las tablas de ingeniería, en kilojulios. Esa primera división por mil se aplica <strong>siempre</strong>, y la conversión al sistema inglés después. Separar los dos pasos evita el error clásico de aplicar un factor combinado y equivocarse en un orden de magnitud.</div>
+  </div>
+
+  <p>La conversión se decide <strong>por tipo de magnitud</strong>, no por nombre de campo. Añadir una propiedad nueva no obliga a recordar su factor: basta con declarar de qué tipo es.</p>
+</section>
+
+<!-- ══════════════ 6 ══════════════ -->
+<section id="s6">
+  <span class="sec-num">06</span>
+  <h2>La IA explica, no calcula</h2>
+  <p class="intro">Hay un segundo endpoint que explica los resultados en lenguaje natural. La decisión de diseño es que <strong>el modelo nunca produce un número</strong>.</p>
 
   <div class="formula">
     <div class="f-head"><span class="f-name">Los dos caminos</span></div>
@@ -426,58 +535,49 @@ explicación   estado, T, P  ──→  CoolProp  ──→  propiedades
                                           modelo de lenguaje
                                                     ↓
                                             texto explicativo</div>
-    <div class="f-note">El segundo endpoint <strong>también calcula primero</strong>. No le pasa los parámetros al modelo para que resuelva: resuelve con la librería y le entrega los resultados ya obtenidos para que los explique.</div>
+    <div class="f-note">El endpoint que explica <strong>también calcula primero</strong>. No le entrega los parámetros al modelo para que resuelva: resuelve con la librería y le pasa los resultados ya obtenidos.</div>
   </div>
 
   <div class="callout rule">
-    <div class="c-title">La instrucción es explícita</div>
-    <p>El mensaje de sistema le dice al modelo que el usuario <strong>ya obtuvo los resultados</strong> con la librería, que su tarea es explicar esos resultados concretos, y —literalmente— que <strong>no invente valores distintos a los proporcionados</strong>.</p>
-    <p>No se confía en que el modelo se comporte: se le quita el trabajo en el que se equivocaría.</p>
-  </div>
-</section>
-
-<!-- ══════════════ 3 ══════════════ -->
-<section id="s3">
-  <span class="sec-num">03</span>
-  <h2>Por qué importa aquí</h2>
-  <p class="intro">Un modelo de lenguaje produce números termodinámicos <strong>plausibles</strong>. Ese es exactamente el problema.</p>
-
-  <div class="callout">
-    <div class="c-title">El fallo que no se ve</div>
-    <p>Si a un modelo se le pide la entalpía del vapor a una temperatura y una presión, contesta un valor con las unidades correctas, del orden de magnitud correcto y con la cantidad de cifras que uno esperaría. Un estudiante que está aprendiendo <strong>no tiene forma de detectar que está mal</strong> — precisamente porque todavía no sabe cuál es el valor bueno.</p>
-    <p>Una calculadora que se equivoca visiblemente enseña poco pero no hace daño. Una que se equivoca de forma convincente enseña algo falso, y lo enseña con autoridad.</p>
+    <div class="c-title">Por qué no basta con confiar</div>
+    <p>Un modelo de lenguaje produce valores termodinámicos <strong>plausibles</strong>: unidades correctas, orden de magnitud correcto, la cantidad de cifras que uno esperaría. Un estudiante no puede detectar que están mal — precisamente porque todavía no sabe cuál es el valor bueno.</p>
+    <p>La instrucción del sistema se lo dice de forma explícita: que los resultados <strong>ya fueron obtenidos</strong>, que su tarea es explicarlos, y que <strong>no invente valores distintos a los proporcionados</strong>. Pero la garantía no es esa instrucción: es que el número correcto ya está calculado antes de que el modelo intervenga.</p>
   </div>
 
-  <p>Con la separación, el número viene siempre de la librería. El modelo aporta lo que sí sabe hacer bien: <strong>redactar el razonamiento</strong> que conecta esos números con la teoría, describir el procedimiento con tablas, y explicar la interpolación. Si el texto se equivoca en una explicación, el número sigue siendo correcto y verificable.</p>
+  <p>Lo que el modelo sí aporta es lo que hace bien: redactar de dónde sale cada propiedad, qué significa físicamente, y <strong>cómo se obtendría con tablas</strong> — incluida la interpolación cuando hace falta. Si esa explicación se equivoca, el número sigue siendo correcto y verificable.</p>
 
-  <h3>Y si no hay modelo disponible</h3>
-  <p>Sin credenciales del proveedor, <strong>la calculadora funciona igual</strong>: lo único que no está disponible es la explicación. La parte que da valor numérico no depende del servicio externo, que es la consecuencia natural de haber puesto la frontera donde está.</p>
+  <p>Sin credenciales del proveedor la calculadora <strong>funciona igual</strong>: lo único ausente es la explicación. La consecuencia natural de haber puesto la frontera donde está.</p>
 </section>
 
-<!-- ══════════════ 4 ══════════════ -->
-<section id="s4">
-  <span class="sec-num">04</span>
-  <h2>Unidades</h2>
-  <p class="intro">Acepta y convierte entre <strong>sistema internacional e inglés</strong>. No es una comodidad: es donde más se equivoca quien está aprendiendo.</p>
-
-  <p>La conversión ocurre en un punto único, a la entrada y a la salida, y el cálculo interno trabaja siempre en las unidades que la librería espera. Convertir en varios sitios es la forma habitual de que aparezca un factor aplicado dos veces — un error que además produce, otra vez, un número plausible.</p>
-</section>
-
-<!-- ══════════════ 5 ══════════════ -->
-<section id="s5">
-  <span class="sec-num">05</span>
+<!-- ══════════════ 7 ══════════════ -->
+<section id="s7">
+  <span class="sec-num">07</span>
   <h2>Arquitectura</h2>
   <p class="intro">Un cliente web y una función de servidor, desplegados juntos.</p>
 
   <div class="formula">
     <div class="f-head"><span class="f-name">Estructura</span></div>
-    <div class="f-eq">api/       función Python: CoolProp, conversión de unidades y explicación
+    <div class="f-eq">api/       función Python
+             · CoolProp para saturado y sobrecalentado
+             · modelo analítico para gas ideal
+             · conversión de unidades por tipo de magnitud
+             · endpoint de explicación
 frontend/  interfaz web
-config     reescribe las rutas de API hacia la función y sirve el cliente</div>
-    <div class="f-note">La lógica de cálculo vive en Python porque ahí está la librería. Llevarla al navegador habría obligado a reimplementar las propiedades de los fluidos, que es justo lo que la herramienta no quiere hacer.</div>
+config     reescribe las rutas de API hacia la función</div>
+    <div class="f-note">La lógica vive en Python porque ahí está la librería de propiedades. Llevarla al navegador habría obligado a reimplementar las ecuaciones de estado del agua, que es exactamente lo que la herramienta evita hacer.</div>
   </div>
 
-  <p>La clave del proveedor del modelo se configura como variable de entorno y no se versiona. El repositorio publica una plantilla con los nombres de las variables y sin sus valores, que es la forma correcta de documentar una configuración sensible.</p>
+  <div class="tw">
+    <table class="data">
+      <thead><tr><th>Endpoint</th><th>Qué hace</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">calcular</span></td><td>Propiedades para un estado, temperatura y presión</td></tr>
+        <tr><td><span class="mono">explicacion</span></td><td>Calcula lo mismo y devuelve la explicación de esos resultados</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>La clave del proveedor del modelo se configura como variable de entorno y no se versiona. El repositorio publica una plantilla con los nombres de las variables y sin sus valores.</p>
 </section>
 
 </main>
@@ -498,7 +598,7 @@ config     reescribe las rutas de API hacia la función y sirve el cliente</div>
     </div>
   </div>
 <p>Documento técnico · Calculadora Termodinámica</p>
-  <p>Elaborado a partir del código del repositorio.</p>
+  <p>Elaborado a partir del código. Las expresiones reproducen las implementadas.</p>
 </footer>
 
 </div>
