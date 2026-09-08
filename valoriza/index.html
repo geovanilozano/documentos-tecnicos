@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Documento tecnico de Valoriza: aportes de socios con aprobacion, tesoreria con cadena de autorizacion, mayorias societarias con conflicto de interes y cierre de periodo contable.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8F%9B%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<title>Valoriza — Documento técnico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+
+:root{
+  --ground:#F1F4F7;
+  --surface:#FFFFFF;
+  --surface-2:#E7ECF1;
+  --ink:#121920;
+  --ink-2:#3B4751;
+  --muted:#6A7783;
+  --line:#D2D9E1;
+  --line-soft:#E2E7ED;
+  --accent:#0E6C88;
+  --accent-ink:#095065;
+  --accent-soft:#DBEBF2;
+  --energy:#A96908;
+  --energy-soft:#F6E9D4;
+  --ok:#2B7A56;
+  --crit:#A93A33;
+  --crit-soft:#F6DFDD;
+  --shadow:0 1px 2px rgba(18,25,32,.05), 0 8px 24px -16px rgba(18,25,32,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+  --ground:#0C1116;
+  --surface:#131A21;
+  --surface-2:#1B232B;
+  --ink:#E5EAEF;
+  --ink-2:#B5C0CB;
+  --muted:#84919E;
+  --line:#27313A;
+  --line-soft:#1F272F;
+  --accent:#4FB3CE;
+  --accent-ink:#8FD3E6;
+  --accent-soft:#10303D;
+  --energy:#DFA245;
+  --energy-soft:#33260F;
+  --ok:#5CB98B;
+  --crit:#E0736B;
+  --crit-soft:#361E1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C1116;
+  --surface:#131A21;
+  --surface-2:#1B232B;
+  --ink:#E5EAEF;
+  --ink-2:#B5C0CB;
+  --muted:#84919E;
+  --line:#27313A;
+  --line-soft:#1F272F;
+  --accent:#4FB3CE;
+  --accent-ink:#8FD3E6;
+  --accent-soft:#10303D;
+  --energy:#DFA245;
+  --energy-soft:#33260F;
+  --ok:#5CB98B;
+  --crit:#E0736B;
+  --crit-soft:#361E1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+/* Eleccion explicita del lector — va despues, por eso gana */
+:root[data-doc-theme="light"]{
+  --ground:#F1F4F7;
+  --surface:#FFFFFF;
+  --surface-2:#E7ECF1;
+  --ink:#121920;
+  --ink-2:#3B4751;
+  --muted:#6A7783;
+  --line:#D2D9E1;
+  --line-soft:#E2E7ED;
+  --accent:#0E6C88;
+  --accent-ink:#095065;
+  --accent-soft:#DBEBF2;
+  --energy:#A96908;
+  --energy-soft:#F6E9D4;
+  --ok:#2B7A56;
+  --crit:#A93A33;
+  --crit-soft:#F6DFDD;
+  --shadow:0 1px 2px rgba(18,25,32,.05), 0 8px 24px -16px rgba(18,25,32,.28);
+}
+:root[data-doc-theme="dark"]{
+  --ground:#0C1116;
+  --surface:#131A21;
+  --surface-2:#1B232B;
+  --ink:#E5EAEF;
+  --ink-2:#B5C0CB;
+  --muted:#84919E;
+  --line:#27313A;
+  --line-soft:#1F272F;
+  --accent:#4FB3CE;
+  --accent-ink:#8FD3E6;
+  --accent-soft:#10303D;
+  --energy:#DFA245;
+  --energy-soft:#33260F;
+  --ok:#5CB98B;
+  --crit:#E0736B;
+  --crit-soft:#361E1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.62;
+  margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance;margin:0;line-height:1.15;letter-spacing:-.015em}
+code,.mono,.formula,table.data td.num{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+/* ── shell ───────────────────────────────────────────── */
+.shell{max-width:1240px;margin:0 auto;padding:0 24px 96px;display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:1080px){
+  .shell{grid-template-columns:232px minmax(0,1fr);column-gap:56px;align-items:start}
+  .masthead{grid-column:1/-1}
+}
+
+/* ── masthead ────────────────────────────────────────── */
+.masthead{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+.kicker{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 22px
+}
+.masthead h1{font-size:clamp(38px,6.2vw,68px);font-weight:700;max-width:16ch}
+.masthead .lede{
+  font-size:clamp(18px,2.2vw,21px);color:var(--ink-2);max-width:62ch;margin:22px 0 0
+}
+.meta-row{
+  display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:32px;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)
+}
+.meta-row b{color:var(--ink-2);font-weight:500}
+
+/* ── toc ─────────────────────────────────────────────── */
+.toc{display:none}
+@media(min-width:1080px){
+  .toc{display:block;position:sticky;top:32px;padding-top:44px}
+  .toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+  .toc a{
+    display:grid;grid-template-columns:26px 1fr;gap:8px;text-decoration:none;
+    font-family:Archivo,sans-serif;font-size:13.5px;line-height:1.35;color:var(--ink-2);
+    padding:6px 8px;border-radius:4px;border-left:2px solid transparent
+  }
+  .toc a span{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);padding-top:1px}
+  .toc a:hover{background:var(--surface);color:var(--ink);border-left-color:var(--accent)}
+  .toc .toc-label{
+    font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--muted);padding:0 8px 12px
+  }
+}
+
+/* ── sections ────────────────────────────────────────── */
+main{padding-top:44px;min-width:0}
+section{padding:0 0 12px;scroll-margin-top:24px}
+section + section{margin-top:56px;padding-top:44px;border-top:1px solid var(--line-soft)}
+.sec-num{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;
+  color:var(--accent);display:block;margin-bottom:12px
+}
+section > h2{font-size:clamp(25px,3.4vw,33px);font-weight:600;max-width:22ch}
+section > .intro{color:var(--ink-2);max-width:66ch;margin:16px 0 0}
+h3{font-size:19px;font-weight:600;margin:38px 0 0;max-width:34ch}
+h4{font-size:14px;font-weight:600;margin:26px 0 0;letter-spacing:0}
+p{max-width:68ch;margin:14px 0 0}
+ul,ol{max-width:68ch;margin:14px 0 0;padding-left:22px}
+li{margin-top:6px}
+li::marker{color:var(--muted)}
+strong{font-weight:600}
+em.term{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:.88em;color:var(--ink-2);background:var(--surface-2);padding:1px 5px;border-radius:3px}
+p .mono,li .mono,td .mono{
+  font-size:.88em;color:var(--ink);background:var(--surface-2);
+  padding:1px 5px;border-radius:3px;overflow-wrap:break-word
+}
+
+/* ── pipeline ────────────────────────────────────────── */
+.pipeline{display:grid;gap:10px;margin-top:28px}
+@media(min-width:720px){.pipeline{grid-template-columns:repeat(4,1fr)}}
+.stage{
+  background:var(--surface);border:1px solid var(--line);border-radius:5px;
+  padding:16px 16px 18px;position:relative;box-shadow:var(--shadow)
+}
+.stage::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--accent);border-radius:5px 0 0 5px}
+.stage:first-child::before{background:var(--energy)}
+.stage .st-n{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.stage .st-t{font-family:Archivo,sans-serif;font-weight:600;font-size:16px;margin-top:8px;display:block}
+.stage .st-d{font-size:14px;color:var(--ink-2);margin-top:8px;line-height:1.5}
+.stage .st-tech{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin-top:12px;display:block}
+
+/* ── layer stack ─────────────────────────────────────── */
+.stack{margin-top:28px;border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--surface)}
+.layer{display:grid;grid-template-columns:1fr;gap:4px;padding:16px 18px;border-top:1px solid var(--line-soft)}
+.layer:first-child{border-top:0}
+@media(min-width:640px){.layer{grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:baseline}}
+.layer .l-name{font-family:Archivo,sans-serif;font-weight:600;font-size:14.5px}
+.layer .l-name small{display:block;font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:10.5px;color:var(--muted);letter-spacing:.1em;margin-top:3px}
+.layer .l-body{font-size:14.5px;color:var(--ink-2);line-height:1.55}
+.layer:nth-child(1){background:var(--energy-soft)}
+.layer:nth-child(1) .l-body{color:var(--ink)}
+
+/* ── formula ─────────────────────────────────────────── */
+.formula{
+  margin-top:22px;background:var(--surface);border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 5px 5px 0;padding:16px 18px;
+  box-shadow:var(--shadow)
+}
+.formula .f-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.formula .f-name{font-family:Archivo,sans-serif;font-weight:600;font-size:14px}
+.formula .f-eq{
+  font-size:14.5px;line-height:1.75;color:var(--ink);overflow-x:auto;
+  padding-bottom:2px;white-space:pre-wrap
+}
+.formula .f-note{font-size:14px;color:var(--ink-2);margin-top:12px;line-height:1.5;max-width:66ch}
+.formula.energy{border-left-color:var(--energy)}
+.formula.crit{border-left-color:var(--crit)}
+
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 7px;border-radius:3px;background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap
+}
+.chip.norm{background:var(--surface-2);color:var(--muted)}
+.chip.energy{background:var(--energy-soft);color:var(--energy)}
+.chip.crit{background:var(--crit-soft);color:var(--crit)}
+
+/* ── tables ──────────────────────────────────────────── */
+.tw{overflow-x:auto;margin-top:24px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+table.data{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+table.data th{
+  font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);text-align:left;padding:12px 14px;
+  border-bottom:1px solid var(--line);white-space:nowrap
+}
+table.data td{padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2);line-height:1.5;text-wrap:pretty}
+table.data tr:last-child td{border-bottom:0}
+table.data td:first-child{color:var(--ink);font-weight:600;font-family:Archivo,sans-serif;font-size:13.5px;padding-right:20px;min-width:9ch}
+table.data td.num{text-align:right;font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
+table.data td.mono{font-size:12.5px;color:var(--ink);white-space:normal;overflow-wrap:break-word}
+.st-dot{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:11px;white-space:nowrap}
+.st-dot::before{content:"";width:7px;height:7px;border-radius:50%;flex:none}
+.st-dot.on::before{background:var(--ok)}
+.st-dot.av::before{background:var(--energy)}
+.st-dot.pl::before{background:var(--muted)}
+
+/* ── callout ─────────────────────────────────────────── */
+.callout{
+  margin-top:26px;padding:18px 20px;border-radius:5px;background:var(--surface);
+  border:1px solid var(--line);border-top:3px solid var(--crit)
+}
+.callout.rule{border-top-color:var(--accent)}
+.callout .c-title{font-family:Archivo,sans-serif;font-weight:600;font-size:14.5px;margin-bottom:8px}
+.callout p{font-size:15px;margin-top:8px;max-width:64ch}
+.callout p:first-of-type{margin-top:0}
+
+/* ── grid of cards ───────────────────────────────────── */
+.cards{display:grid;gap:12px;margin-top:24px}
+@media(min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:16px 18px}
+.card h4{margin:0 0 8px}
+.card p{font-size:14.5px;margin:0;color:var(--ink-2);line-height:1.55;max-width:none}
+.card .c-tag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+
+/* ── selector de tema ────────────────────────────────── */
+.theme-toggle{
+  position:fixed;right:20px;bottom:20px;z-index:60;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 16px;border-radius:999px;cursor:pointer;
+  background:var(--surface);color:var(--ink-2);
+  border:1px solid var(--line);box-shadow:var(--shadow);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;font-size:13px;font-weight:600;
+  transition:color .15s ease,border-color .15s ease
+}
+/* En pantalla ancha va arriba, donde se ve al entrar */
+@media(min-width:760px){
+  .theme-toggle{top:22px;bottom:auto}
+}
+.theme-toggle:hover{color:var(--ink);border-color:var(--accent)}
+.theme-toggle .tt-icon{font-size:13px;line-height:1}
+@media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}
+
+/* ── steps ───────────────────────────────────────────── */
+ol.steps{list-style:none;padding:0;counter-reset:s;margin-top:22px;max-width:70ch}
+ol.steps li{
+  counter-increment:s;position:relative;
+  margin-top:0;padding:12px 0 12px 42px;border-bottom:1px solid var(--line-soft);
+  font-size:15px;line-height:1.6;color:var(--ink-2)
+}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{
+  content:counter(s,decimal-leading-zero);position:absolute;left:0;top:16px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1;color:var(--accent);
+  font-variant-numeric:tabular-nums
+}
+ol.steps li b{color:var(--ink);font-weight:600}
+
+footer{
+  margin-top:72px;padding-top:28px;border-top:1px solid var(--line);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);line-height:1.8
+}
+@media(min-width:1080px){footer{grid-column:2}}
+
+/* ── impresion / PDF ─────────────────────────────────── */
+@media print{
+  :root,:root[data-theme="dark"],:root[data-doc-theme="dark"]{
+  --ground:#F1F4F7;
+  --surface:#FFFFFF;
+  --surface-2:#E7ECF1;
+  --ink:#121920;
+  --ink-2:#3B4751;
+  --muted:#6A7783;
+  --line:#D2D9E1;
+  --line-soft:#E2E7ED;
+  --accent:#0E6C88;
+  --accent-ink:#095065;
+  --accent-soft:#DBEBF2;
+  --energy:#A96908;
+  --energy-soft:#F6E9D4;
+  --ok:#2B7A56;
+  --crit:#A93A33;
+  --crit-soft:#F6DFDD;
+  --shadow:0 1px 2px rgba(18,25,32,.05), 0 8px 24px -16px rgba(18,25,32,.28);
+    --shadow:none;
+  }
+  .theme-toggle,.toc{display:none !important}
+  .shell{grid-template-columns:1fr !important;max-width:none;padding:0}
+  body{font-size:11pt}
+  section{break-inside:auto}
+  section > h2,h3,h4{break-after:avoid}
+  .formula,.callout,.card,.stage,.tw{break-inside:avoid}
+  footer{grid-column:1 !important}
+}
+
+
+/* ── sello de autoria ────────────────────────────────── */
+.sello{
+  display:flex;align-items:center;gap:15px;
+  margin:0 0 20px;padding-bottom:20px;border-bottom:1px solid var(--line-soft)
+}
+.sello-marca{width:46px;height:46px;flex:none;border-radius:10px;box-shadow:var(--shadow)}
+.sello-txt p{margin:0}
+.sello-nombre{
+  font-family:Archivo,sans-serif;font-weight:600;font-size:14.5px;color:var(--ink);
+  letter-spacing:-.005em
+}
+.sello-rol{
+  font-family:"Source Serif 4",Georgia,serif;font-size:12.5px;color:var(--ink-2);
+  margin-top:2px !important;line-height:1.45
+}
+.sello-nota{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);margin-top:6px !important
+}
+@media(max-width:520px){ .sello{gap:12px} .sello-marca{width:40px;height:40px} }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<header class="masthead">
+  <p class="kicker">Valoriza — Documento técnico de plataforma</p>
+  <h1>Gobierno societario auditable: aportes, votaciones y cierre</h1>
+  <p class="lede">Cómo se registra lo que cada socio aportó, cómo se aprueba una salida de dinero antes de que ocurra, cómo se cuenta una votación cuando alguien tiene conflicto de interés, y por qué un mes cerrado deja de poder editarse.</p>
+  <div class="meta-row">
+    <span><b>Alcance</b> · 17 módulos · 20 entidades</span>
+    <span><b>Base</b> · PostgreSQL · Prisma</span>
+    <span><b>Pruebas</b> · 81 · unitarias y de integración</span>
+    <span><b>Marco</b> · S.A.S. cerrada — Colombia</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contenido">
+  <p class="toc-label">Contenido</p>
+  <ol>
+    <li><a href="#s1"><span>01</span>Qué resuelve</a></li>
+    <li><a href="#s2"><span>02</span>Aportes de los socios</a></li>
+    <li><a href="#s3"><span>03</span>Tesorería con aprobaciones</a></li>
+    <li><a href="#s4"><span>04</span>Capital y participación</a></li>
+    <li><a href="#s5"><span>05</span>Votaciones y conflicto de interés</a></li>
+    <li><a href="#s6"><span>06</span>Reuniones y actas</a></li>
+    <li><a href="#s7"><span>07</span>Cierre de periodo</a></li>
+    <li><a href="#s8"><span>08</span>Trazabilidad</a></li>
+    <li><a href="#s9"><span>09</span>Tránsito a S.A.S.</a></li>
+    <li><a href="#s10"><span>10</span>Arquitectura y verificación</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ══════════════ 1 ══════════════ -->
+<section id="s1">
+  <span class="sec-num">01</span>
+  <h2>Qué resuelve</h2>
+  <p class="intro">Una sociedad cerrada de pocos socios no falla por falta de contabilidad: falla por <strong>falta de acuerdo sobre los hechos</strong>. Quién aportó cuánto y cuándo, quién autorizó ese egreso, qué se decidió en la reunión de marzo y con qué mayoría.</p>
+
+  <p>Valoriza existe para que esas preguntas tengan una sola respuesta, y para que esa respuesta <strong>no cambie después</strong>. Casi todo el diseño se explica por ahí: los estados que obligan a pasar por una aprobación, los periodos que se cierran, el borrado que exige un motivo.</p>
+
+  <div class="cards">
+    <div class="card">
+      <span class="c-tag">Aportes</span>
+      <h4>Con evidencia y aprobación</h4>
+      <p>Cada cuota tiene su comprobante, quién la aprobó y, si se rechazó, por qué.</p>
+    </div>
+    <div class="card">
+      <span class="c-tag">Egresos</span>
+      <h4>Autorizados antes de pagarse</h4>
+      <p>Un movimiento recorre solicitud, aprobación y pago. No se puede pagar lo que nadie aprobó.</p>
+    </div>
+    <div class="card">
+      <span class="c-tag">Decisiones</span>
+      <h4>Mayorías según el tipo</h4>
+      <p>Ordinaria, calificada o unánime, con el conflicto de interés descontado del censo.</p>
+    </div>
+    <div class="card">
+      <span class="c-tag">Historia</span>
+      <h4>Periodos que se cierran</h4>
+      <p>Un mes cerrado deja de aceptar movimientos: los números del pasado dejan de moverse.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 2 ══════════════ -->
+<section id="s2">
+  <span class="sec-num">02</span>
+  <h2>Aportes de los socios</h2>
+  <p class="intro">El plan de aportes se genera completo desde el inicio: <strong>el aporte inicial y las cuotas mensuales</strong>, cada una con su fecha de vencimiento y su monto esperado. Existir antes de pagarse es lo que permite hablar de mora.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">Estados de una cuota</span></div>
+    <div class="f-eq">PENDIENTE ─→ CARGADO ─→ EN_REVISIÓN ─→ APROBADO
+                                  └─→ RECHAZADO
+
+     MORA          vencida sin pago aprobado
+     ANTICIPADO    pagada antes de su vencimiento
+     ANULADO       dada de baja, con motivo</div>
+    <div class="f-note">La separación entre <strong>cargado</strong> y <strong>aprobado</strong> es el punto del diseño: el socio sube su comprobante, pero el aporte no cuenta como capital hasta que alguien lo revisa. Un sistema donde subir la foto ya suma dinero no sirve para respaldar una participación societaria.</div>
+  </div>
+
+  <p>Cada cuota guarda el monto esperado y el efectivamente pagado por separado, así que un pago parcial es representable sin mentir en ninguno de los dos. Y guarda quién aprobó, cuándo, y en caso de rechazo el motivo: <strong>rechazar sin explicar no es una opción del modelo</strong>.</p>
+</section>
+
+<!-- ══════════════ 3 ══════════════ -->
+<section id="s3">
+  <span class="sec-num">03</span>
+  <h2>Tesorería con aprobaciones</h2>
+  <p class="intro">Un movimiento de tesorería no se registra: <strong>se tramita</strong>. Recorre una cadena de estados donde cada paso lo ejecuta alguien distinto.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">Ciclo de un egreso</span></div>
+    <div class="f-eq">BORRADOR ─→ SOLICITADO ─→ PENDIENTE_APROBACIÓN ─→ APROBADO ─→ PAGADO
+                                    └─→ RECHAZADO
+                                    └─→ ANULADO</div>
+    <div class="f-note">El estado <strong>PAGADO</strong> es distinto de <strong>APROBADO</strong> a propósito: autorizar un gasto y girarlo son dos hechos con fechas distintas, y confundirlos hace imposible saber cuánto está comprometido pero todavía no ha salido de la cuenta.</div>
+  </div>
+
+  <div class="callout">
+    <div class="c-title">Por qué el borrador es un estado y no una ausencia</div>
+    <p>Un movimiento en borrador ya existe y ya es visible: se puede discutir antes de solicitarlo formalmente. Si el borrador viviera solo en el formulario de quien lo escribe, la conversación previa a la solicitud ocurriría fuera del sistema, que es justo donde después no hay rastro.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 4 ══════════════ -->
+<section id="s4">
+  <span class="sec-num">04</span>
+  <h2>Capital y participación</h2>
+  <p class="intro">La participación de cada socio no se escribe a mano: <strong>se calcula</strong> a partir del capital efectivamente pagado y el valor nominal de la acción.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">Acciones y porcentaje</span></div>
+    <div class="f-eq">acciones del socio = capital pagado / valor nominal
+
+participación (%) = acciones del socio / acciones totales</div>
+    <div class="f-note">Se calcula al vuelo sobre el total de la sociedad, así que aprobar un aporte cambia la participación de todos sin que nadie tenga que actualizar una tabla.</div>
+  </div>
+
+  <div class="callout rule">
+    <div class="c-title">El socio ve exactamente el mismo número</div>
+    <p>La fila de capital que ve un socio en su propia pantalla usa <strong>la misma función</strong> que la tabla general de contabilidad. No es una consulta parecida escrita dos veces: es el mismo código.</p>
+    <p>En una sociedad, dos pantallas que muestran porcentajes distintos por un redondeo diferente no son un detalle estético — son una discusión entre socios.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 5 ══════════════ -->
+<section id="s5">
+  <span class="sec-num">05</span>
+  <h2>Votaciones y conflicto de interés</h2>
+  <p class="intro">Contar votos parece trivial hasta que aparecen dos cosas: <strong>tipos de mayoría distintos</strong> y <strong>socios que no pueden votar</strong>.</p>
+
+  <h3>Quién puede votar</h3>
+  <p>El censo de una votación son los socios <strong>activos que no tengan conflicto declarado</strong> en esa votación concreta. El conflicto no es un atributo del socio sino de la pareja socio–votación: alguien puede estar impedido en la decisión sobre un contrato y ser perfectamente elegible en la siguiente.</p>
+
+  <div class="callout">
+    <div class="c-title">El conflicto reduce el denominador, no solo el numerador</div>
+    <p>Declarar un conflicto bloquea el voto de ese socio <em>y</em> lo saca del censo elegible. Si solo bloqueara el voto, su ausencia contaría como un voto que falta y una decisión unánime sería imposible de alcanzar. Sacándolo del censo, la unanimidad se mide entre quienes sí podían decidir.</p>
+  </div>
+
+  <h3>Las tres mayorías</h3>
+  <div class="tw">
+    <table class="data">
+      <thead><tr><th>Tipo</th><th>Condición para aprobar</th><th>Ejemplo sobre 10 elegibles</th></tr></thead>
+      <tbody>
+        <tr><td>Ordinaria</td><td>Mayoría simple de los votos emitidos</td><td class="mono">más votos a favor que en contra</td></tr>
+        <tr><td>Calificada</td><td class="mono">favor ≥ ⌈ 2/3 · elegibles ⌉</td><td class="mono">7 aprueban · 6 no</td></tr>
+        <tr><td>Unánime</td><td class="mono">favor = elegibles, con elegibles &gt; 0</td><td class="mono">una abstención ya lo impide</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Dos detalles que las pruebas fijan de forma explícita: la calificada se mide contra <strong>los elegibles</strong> y no contra los que votaron —abstenerse no baja el umbral—, y la unanimidad exige que haya al menos un elegible, para que una votación sin censo no se apruebe sola.</p>
+
+  <p>Cada voto es a favor, en contra o abstención, y queda atado a su socio. La votación puede colgar de una reunión o existir por sí sola, para decisiones que se toman fuera de sesión.</p>
+</section>
+
+<!-- ══════════════ 6 ══════════════ -->
+<section id="s6">
+  <span class="sec-num">06</span>
+  <h2>Reuniones y actas</h2>
+  <p class="intro">Una reunión tiene convocatoria, <strong>asistencia registrada</strong> y acta. Las tres cosas separadas, porque responden a preguntas distintas y se producen en momentos distintos.</p>
+
+  <p>La asistencia es su propia entidad: quién estaba es un hecho verificable que condiciona la validez de lo decidido, y no puede quedar como una frase dentro del acta. Las votaciones asociadas a la reunión se enlazan a ella, de modo que el acta y el resultado de la votación <strong>no pueden contarse distinto</strong>.</p>
+</section>
+
+<!-- ══════════════ 7 ══════════════ -->
+<section id="s7">
+  <span class="sec-num">07</span>
+  <h2>Cierre de periodo</h2>
+  <p class="intro">Un mes se cierra, y a partir de ahí <strong>deja de aceptar movimientos con fecha dentro de él</strong>.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">La comprobación</span></div>
+    <div class="f-eq">periodo(fecha) = (año, mes)
+
+cerrado(fecha) = periodo(fecha) ∈ periodos cerrados</div>
+    <div class="f-note">Se evalúa contra la fecha del movimiento, no contra la fecha de registro. Intentar meter hoy un gasto con fecha de un mes ya cerrado es exactamente lo que el cierre debe impedir.</div>
+  </div>
+
+  <div class="callout">
+    <div class="c-title">Por qué esto importa más de lo que parece</div>
+    <p>Sin cierre, un reporte del primer trimestre puede dar un número distinto cada vez que se abre, porque alguien siguió registrando cosas hacia atrás. En una sociedad donde ese reporte respalda un reparto o una decisión, <strong>que el pasado se mueva es un problema de gobierno, no de contabilidad</strong>.</p>
+  </div>
+
+  <p>El cierre guarda quién lo hizo y cuándo, y es una entidad propia con año y mes, no una bandera dentro de otra tabla.</p>
+</section>
+
+<!-- ══════════════ 8 ══════════════ -->
+<section id="s8">
+  <span class="sec-num">08</span>
+  <h2>Trazabilidad</h2>
+  <p class="intro">Tres mecanismos, cada uno cubriendo un hueco distinto.</p>
+
+  <div class="tw">
+    <table class="data">
+      <thead><tr><th>Mecanismo</th><th>Qué garantiza</th></tr></thead>
+      <tbody>
+        <tr><td>Registro de auditoría</td><td>Qué cambió, quién lo cambió y cuándo</td></tr>
+        <tr><td>Borrado lógico con motivo</td><td>Nada se elimina de verdad. Se guarda quién lo dio de baja y <b>por qué</b></td></tr>
+        <tr><td>Documentos con estado</td><td>Los soportes viven en el sistema, no en el correo de alguien</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Que el borrado exija un motivo es una decisión de diseño, no un campo opcional que alguien olvidó marcar como obligatorio. En una sociedad, «este aporte ya no aparece» sin explicación es peor que el error que se intentaba corregir.</p>
+
+  <p>El sistema incluye además tareas y notificaciones, para que un aporte en mora o un movimiento esperando aprobación no dependan de que alguien se acuerde de mirar.</p>
+</section>
+
+<!-- ══════════════ 9 ══════════════ -->
+<section id="s9">
+  <span class="sec-num">09</span>
+  <h2>Tránsito a S.A.S.</h2>
+  <p class="intro">Formalizar una sociedad en Colombia es una secuencia de trámites que se hacen una sola vez, en orden, y donde olvidar uno bloquea los siguientes.</p>
+
+  <p>El sistema lleva esa lista como una entidad única con once hitos: disponibilidad del nombre, estatutos, documento de constitución, registro en cámara de comercio, RUT, cuenta bancaria, acuerdo de accionistas, libro de accionistas, actas iniciales, contador y facturación electrónica. Cada uno se marca al cumplirse, y de ahí sale un <strong>porcentaje de avance</strong>.</p>
+
+  <div class="callout">
+    <div class="c-title">Un registro único, no una tabla de filas</div>
+    <p>Es un solo registro con identificador fijo, porque la lista de trámites de constitución no se repite: una sociedad se constituye una vez. Modelarla como una colección invitaría a que existieran dos, y entonces habría que decidir cuál es la buena.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 10 ══════════════ -->
+<section id="s10">
+  <span class="sec-num">10</span>
+  <h2>Arquitectura y verificación</h2>
+  <p class="intro">La aplicación está organizada por <strong>módulos de dominio</strong>, no por capas técnicas. Cada módulo agrupa su lógica, sus consultas y sus acciones.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">Estructura de un módulo</span></div>
+    <div class="f-eq">modules/votaciones/
+  tally.ts         cómo se cuentan los votos    ·  puro
+  eligibility.ts   quién puede votar            ·  puro
+  service.ts       orquestación contra la base de datos
+  queries.ts       lecturas para las pantallas
+  actions.ts       entradas desde la interfaz
+  schema.ts        validación de lo que llega</div>
+    <div class="f-note">Las reglas que deciden —cómo se cuenta una mayoría, quién es elegible, si un periodo está cerrado— viven en archivos puros, sin base de datos. Es lo que permite probarlas exhaustivamente sin levantar nada.</div>
+  </div>
+
+  <h3>Dos niveles de prueba</h3>
+  <p><strong>81 pruebas</strong>, divididas en dos clases con propósito distinto:</p>
+
+  <div class="tw">
+    <table class="data">
+      <thead><tr><th>Nivel</th><th>Qué verifica</th></tr></thead>
+      <tbody>
+        <tr><td>Unitarias</td><td>Las reglas puras: umbrales de mayoría, censo elegible, tabla de capital, periodo cerrado</td></tr>
+        <tr><td>Integración</td><td>El comportamiento contra una base de datos real: que un conflicto declarado bloquee el voto, que el cierre rechace el movimiento</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>La puerta de calidad levanta una base de datos, aplica las migraciones y corre ambos niveles junto con el lint y el chequeo de tipos antes de permitir un despliegue.</p>
+</section>
+
+</main>
+
+<footer>
+    <div class="sello">
+    <svg class="sello-marca" viewBox="0 0 100 100" role="img" aria-label="Sello de autoría de Geovani Lozano">
+      <rect width="100" height="100" rx="19" fill="#0F172A"/>
+      <text x="50" y="47" text-anchor="middle" dominant-baseline="central"
+            font-family="Archivo, Helvetica Neue, Arial, sans-serif" font-weight="700"
+            font-size="42" letter-spacing="-1" fill="#FFFFFF">GL</text>
+      <rect x="34" y="70" width="32" height="7" rx="3.5" fill="#F59E0B"/>
+    </svg>
+    <div class="sello-txt">
+      <p class="sello-nombre">Geovani Lozano</p>
+      <p class="sello-rol">Ingeniero Electromecánico · MSc en Ingeniería Matemática y Computacional</p>
+      <p class="sello-nota">Documento técnico · Valoriza · 2026</p>
+    </div>
+  </div>
+<p>Documento técnico de plataforma · Valoriza</p>
+  <p>Elaborado a partir del esquema de datos y de las reglas implementadas.</p>
+</footer>
+
+</div>
+
+<button class="theme-toggle" id="tt" type="button" aria-label="Cambiar tema">
+  <span class="tt-ico" aria-hidden="true">☾</span><span id="tt-txt">Modo oscuro</span>
+</button>
+
+<script>
+(function () {
+  var raiz = document.documentElement, boton = document.getElementById('tt'), texto = document.getElementById('tt-txt');
+  var guardado = null;
+  try { guardado = localStorage.getItem('valoriza-tema'); } catch (e) {}
+  var oscuro = guardado ? guardado === 'dark'
+                        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  function pintar() {
+    raiz.setAttribute('data-theme', oscuro ? 'dark' : 'light');
+    texto.textContent = oscuro ? 'Modo claro' : 'Modo oscuro';
+    boton.querySelector('.tt-ico').textContent = oscuro ? '☀' : '☾';
+  }
+  pintar();
+  boton.addEventListener('click', function () {
+    oscuro = !oscuro;
+    try { localStorage.setItem('valoriza-tema', oscuro ? 'dark' : 'light'); } catch (e) {}
+    pintar();
+  });
+})();
+</script>
+
+</body>
+</html>
