@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Documento tecnico del Simulador de Telemetria Industrial: siete practicas didacticas, modelos fisicos tras una interfaz comun, sensores con ruido y cinco fallas inyectables, catalogo de instrumentacion y cadena MQTT completa.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8F%AD%3C/text%3E%3C/svg%3E">
+<title>Simulador de Telemetría Industrial — Documento técnico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+
+:root{
+  --ground:#F1F4F7;
+  --surface:#FFFFFF;
+  --surface-2:#E7ECF1;
+  --ink:#121920;
+  --ink-2:#3B4751;
+  --muted:#6A7783;
+  --line:#D2D9E1;
+  --line-soft:#E2E7ED;
+  --accent:#0E6C88;
+  --accent-ink:#095065;
+  --accent-soft:#DBEBF2;
+  --energy:#A96908;
+  --energy-soft:#F6E9D4;
+  --ok:#2B7A56;
+  --crit:#A93A33;
+  --crit-soft:#F6DFDD;
+  --shadow:0 1px 2px rgba(18,25,32,.05), 0 8px 24px -16px rgba(18,25,32,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+  --ground:#0C1116;
+  --surface:#131A21;
+  --surface-2:#1B232B;
+  --ink:#E5EAEF;
+  --ink-2:#B5C0CB;
+  --muted:#84919E;
+  --line:#27313A;
+  --line-soft:#1F272F;
+  --accent:#4FB3CE;
+  --accent-ink:#8FD3E6;
+  --accent-soft:#10303D;
+  --energy:#DFA245;
+  --energy-soft:#33260F;
+  --ok:#5CB98B;
+  --crit:#E0736B;
+  --crit-soft:#361E1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C1116;
+  --surface:#131A21;
+  --surface-2:#1B232B;
+  --ink:#E5EAEF;
+  --ink-2:#B5C0CB;
+  --muted:#84919E;
+  --line:#27313A;
+  --line-soft:#1F272F;
+  --accent:#4FB3CE;
+  --accent-ink:#8FD3E6;
+  --accent-soft:#10303D;
+  --energy:#DFA245;
+  --energy-soft:#33260F;
+  --ok:#5CB98B;
+  --crit:#E0736B;
+  --crit-soft:#361E1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+/* Eleccion explicita del lector — va despues, por eso gana */
+:root[data-doc-theme="light"]{
+  --ground:#F1F4F7;
+  --surface:#FFFFFF;
+  --surface-2:#E7ECF1;
+  --ink:#121920;
+  --ink-2:#3B4751;
+  --muted:#6A7783;
+  --line:#D2D9E1;
+  --line-soft:#E2E7ED;
+  --accent:#0E6C88;
+  --accent-ink:#095065;
+  --accent-soft:#DBEBF2;
+  --energy:#A96908;
+  --energy-soft:#F6E9D4;
+  --ok:#2B7A56;
+  --crit:#A93A33;
+  --crit-soft:#F6DFDD;
+  --shadow:0 1px 2px rgba(18,25,32,.05), 0 8px 24px -16px rgba(18,25,32,.28);
+}
+:root[data-doc-theme="dark"]{
+  --ground:#0C1116;
+  --surface:#131A21;
+  --surface-2:#1B232B;
+  --ink:#E5EAEF;
+  --ink-2:#B5C0CB;
+  --muted:#84919E;
+  --line:#27313A;
+  --line-soft:#1F272F;
+  --accent:#4FB3CE;
+  --accent-ink:#8FD3E6;
+  --accent-soft:#10303D;
+  --energy:#DFA245;
+  --energy-soft:#33260F;
+  --ok:#5CB98B;
+  --crit:#E0736B;
+  --crit-soft:#361E1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.62;
+  margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance;margin:0;line-height:1.15;letter-spacing:-.015em}
+code,.mono,.formula,table.data td.num{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+/* ── shell ───────────────────────────────────────────── */
+.shell{max-width:1240px;margin:0 auto;padding:0 24px 96px;display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:1080px){
+  .shell{grid-template-columns:232px minmax(0,1fr);column-gap:56px;align-items:start}
+  .masthead{grid-column:1/-1}
+}
+
+/* ── masthead ────────────────────────────────────────── */
+.masthead{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+.kicker{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 22px
+}
+.masthead h1{font-size:clamp(38px,6.2vw,68px);font-weight:700;max-width:16ch}
+.masthead .lede{
+  font-size:clamp(18px,2.2vw,21px);color:var(--ink-2);max-width:62ch;margin:22px 0 0
+}
+.meta-row{
+  display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:32px;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)
+}
+.meta-row b{color:var(--ink-2);font-weight:500}
+
+/* ── toc ─────────────────────────────────────────────── */
+.toc{display:none}
+@media(min-width:1080px){
+  .toc{display:block;position:sticky;top:32px;padding-top:44px}
+  .toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+  .toc a{
+    display:grid;grid-template-columns:26px 1fr;gap:8px;text-decoration:none;
+    font-family:Archivo,sans-serif;font-size:13.5px;line-height:1.35;color:var(--ink-2);
+    padding:6px 8px;border-radius:4px;border-left:2px solid transparent
+  }
+  .toc a span{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);padding-top:1px}
+  .toc a:hover{background:var(--surface);color:var(--ink);border-left-color:var(--accent)}
+  .toc .toc-label{
+    font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--muted);padding:0 8px 12px
+  }
+}
+
+/* ── sections ────────────────────────────────────────── */
+main{padding-top:44px;min-width:0}
+section{padding:0 0 12px;scroll-margin-top:24px}
+section + section{margin-top:56px;padding-top:44px;border-top:1px solid var(--line-soft)}
+.sec-num{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;
+  color:var(--accent);display:block;margin-bottom:12px
+}
+section > h2{font-size:clamp(25px,3.4vw,33px);font-weight:600;max-width:22ch}
+section > .intro{color:var(--ink-2);max-width:66ch;margin:16px 0 0}
+h3{font-size:19px;font-weight:600;margin:38px 0 0;max-width:34ch}
+h4{font-size:14px;font-weight:600;margin:26px 0 0;letter-spacing:0}
+p{max-width:68ch;margin:14px 0 0}
+ul,ol{max-width:68ch;margin:14px 0 0;padding-left:22px}
+li{margin-top:6px}
+li::marker{color:var(--muted)}
+strong{font-weight:600}
+em.term{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:.88em;color:var(--ink-2);background:var(--surface-2);padding:1px 5px;border-radius:3px}
+p .mono,li .mono,td .mono{
+  font-size:.88em;color:var(--ink);background:var(--surface-2);
+  padding:1px 5px;border-radius:3px;overflow-wrap:break-word
+}
+
+/* ── pipeline ────────────────────────────────────────── */
+.pipeline{display:grid;gap:10px;margin-top:28px}
+@media(min-width:720px){.pipeline{grid-template-columns:repeat(4,1fr)}}
+.stage{
+  background:var(--surface);border:1px solid var(--line);border-radius:5px;
+  padding:16px 16px 18px;position:relative;box-shadow:var(--shadow)
+}
+.stage::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--accent);border-radius:5px 0 0 5px}
+.stage:first-child::before{background:var(--energy)}
+.stage .st-n{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.stage .st-t{font-family:Archivo,sans-serif;font-weight:600;font-size:16px;margin-top:8px;display:block}
+.stage .st-d{font-size:14px;color:var(--ink-2);margin-top:8px;line-height:1.5}
+.stage .st-tech{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin-top:12px;display:block}
+
+/* ── layer stack ─────────────────────────────────────── */
+.stack{margin-top:28px;border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--surface)}
+.layer{display:grid;grid-template-columns:1fr;gap:4px;padding:16px 18px;border-top:1px solid var(--line-soft)}
+.layer:first-child{border-top:0}
+@media(min-width:640px){.layer{grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:baseline}}
+.layer .l-name{font-family:Archivo,sans-serif;font-weight:600;font-size:14.5px}
+.layer .l-name small{display:block;font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:10.5px;color:var(--muted);letter-spacing:.1em;margin-top:3px}
+.layer .l-body{font-size:14.5px;color:var(--ink-2);line-height:1.55}
+.layer:nth-child(1){background:var(--energy-soft)}
+.layer:nth-child(1) .l-body{color:var(--ink)}
+
+/* ── formula ─────────────────────────────────────────── */
+.formula{
+  margin-top:22px;background:var(--surface);border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:0 5px 5px 0;padding:16px 18px;
+  box-shadow:var(--shadow)
+}
+.formula .f-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.formula .f-name{font-family:Archivo,sans-serif;font-weight:600;font-size:14px}
+.formula .f-eq{
+  font-size:14.5px;line-height:1.75;color:var(--ink);overflow-x:auto;
+  padding-bottom:2px;white-space:pre-wrap
+}
+.formula .f-note{font-size:14px;color:var(--ink-2);margin-top:12px;line-height:1.5;max-width:66ch}
+.formula.energy{border-left-color:var(--energy)}
+.formula.crit{border-left-color:var(--crit)}
+
+.chip{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 7px;border-radius:3px;background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap
+}
+.chip.norm{background:var(--surface-2);color:var(--muted)}
+.chip.energy{background:var(--energy-soft);color:var(--energy)}
+.chip.crit{background:var(--crit-soft);color:var(--crit)}
+
+/* ── tables ──────────────────────────────────────────── */
+.tw{overflow-x:auto;margin-top:24px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+table.data{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+table.data th{
+  font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);text-align:left;padding:12px 14px;
+  border-bottom:1px solid var(--line);white-space:nowrap
+}
+table.data td{padding:11px 14px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2);line-height:1.5;text-wrap:pretty}
+table.data tr:last-child td{border-bottom:0}
+table.data td:first-child{color:var(--ink);font-weight:600;font-family:Archivo,sans-serif;font-size:13.5px;padding-right:20px;min-width:9ch}
+table.data td.num{text-align:right;font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
+table.data td.mono{font-size:12.5px;color:var(--ink);white-space:normal;overflow-wrap:break-word}
+.st-dot{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:11px;white-space:nowrap}
+.st-dot::before{content:"";width:7px;height:7px;border-radius:50%;flex:none}
+.st-dot.on::before{background:var(--ok)}
+.st-dot.av::before{background:var(--energy)}
+.st-dot.pl::before{background:var(--muted)}
+
+/* ── callout ─────────────────────────────────────────── */
+.callout{
+  margin-top:26px;padding:18px 20px;border-radius:5px;background:var(--surface);
+  border:1px solid var(--line);border-top:3px solid var(--crit)
+}
+.callout.rule{border-top-color:var(--accent)}
+.callout .c-title{font-family:Archivo,sans-serif;font-weight:600;font-size:14.5px;margin-bottom:8px}
+.callout p{font-size:15px;margin-top:8px;max-width:64ch}
+.callout p:first-of-type{margin-top:0}
+
+/* ── grid of cards ───────────────────────────────────── */
+.cards{display:grid;gap:12px;margin-top:24px}
+@media(min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:16px 18px}
+.card h4{margin:0 0 8px}
+.card p{font-size:14.5px;margin:0;color:var(--ink-2);line-height:1.55;max-width:none}
+.card .c-tag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+
+/* ── selector de tema ────────────────────────────────── */
+.theme-toggle{
+  position:fixed;right:20px;bottom:20px;z-index:60;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 16px;border-radius:999px;cursor:pointer;
+  background:var(--surface);color:var(--ink-2);
+  border:1px solid var(--line);box-shadow:var(--shadow);
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;font-size:13px;font-weight:600;
+  transition:color .15s ease,border-color .15s ease
+}
+/* En pantalla ancha va arriba, donde se ve al entrar */
+@media(min-width:760px){
+  .theme-toggle{top:22px;bottom:auto}
+}
+.theme-toggle:hover{color:var(--ink);border-color:var(--accent)}
+.theme-toggle .tt-icon{font-size:13px;line-height:1}
+@media(prefers-reduced-motion:reduce){.theme-toggle{transition:none}}
+
+/* ── steps ───────────────────────────────────────────── */
+ol.steps{list-style:none;padding:0;counter-reset:s;margin-top:22px;max-width:70ch}
+ol.steps li{
+  counter-increment:s;position:relative;
+  margin-top:0;padding:12px 0 12px 42px;border-bottom:1px solid var(--line-soft);
+  font-size:15px;line-height:1.6;color:var(--ink-2)
+}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{
+  content:counter(s,decimal-leading-zero);position:absolute;left:0;top:16px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1;color:var(--accent);
+  font-variant-numeric:tabular-nums
+}
+ol.steps li b{color:var(--ink);font-weight:600}
+
+footer{
+  margin-top:72px;padding-top:28px;border-top:1px solid var(--line);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);line-height:1.8
+}
+@media(min-width:1080px){footer{grid-column:2}}
+
+/* ── impresion / PDF ─────────────────────────────────── */
+@media print{
+  :root,:root[data-theme="dark"],:root[data-doc-theme="dark"]{
+  --ground:#F1F4F7;
+  --surface:#FFFFFF;
+  --surface-2:#E7ECF1;
+  --ink:#121920;
+  --ink-2:#3B4751;
+  --muted:#6A7783;
+  --line:#D2D9E1;
+  --line-soft:#E2E7ED;
+  --accent:#0E6C88;
+  --accent-ink:#095065;
+  --accent-soft:#DBEBF2;
+  --energy:#A96908;
+  --energy-soft:#F6E9D4;
+  --ok:#2B7A56;
+  --crit:#A93A33;
+  --crit-soft:#F6DFDD;
+  --shadow:0 1px 2px rgba(18,25,32,.05), 0 8px 24px -16px rgba(18,25,32,.28);
+    --shadow:none;
+  }
+  .theme-toggle,.toc{display:none !important}
+  .shell{grid-template-columns:1fr !important;max-width:none;padding:0}
+  body{font-size:11pt}
+  section{break-inside:auto}
+  section > h2,h3,h4{break-after:avoid}
+  .formula,.callout,.card,.stage,.tw{break-inside:avoid}
+  footer{grid-column:1 !important}
+}
+
+
+/* ── sello de autoria ────────────────────────────────── */
+.sello{
+  display:flex;align-items:center;gap:15px;
+  margin:0 0 20px;padding-bottom:20px;border-bottom:1px solid var(--line-soft)
+}
+.sello-marca{width:46px;height:46px;flex:none;border-radius:10px;box-shadow:var(--shadow)}
+.sello-txt p{margin:0}
+.sello-nombre{
+  font-family:Archivo,sans-serif;font-weight:600;font-size:14.5px;color:var(--ink);
+  letter-spacing:-.005em
+}
+.sello-rol{
+  font-family:"Source Serif 4",Georgia,serif;font-size:12.5px;color:var(--ink-2);
+  margin-top:2px !important;line-height:1.45
+}
+.sello-nota{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);margin-top:6px !important
+}
+@media(max-width:520px){ .sello{gap:12px} .sello-marca{width:40px;height:40px} }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<header class="masthead">
+  <p class="kicker">Simulador de Telemetría Industrial — Documento técnico</p>
+  <h1>Un laboratorio donde los sensores mienten a propósito</h1>
+  <p class="lede">Siete prácticas de ingeniería con procesos físicos simulados, instrumentación realista y la cadena de telemetría completa. Lo que lo hace un laboratorio y no una animación es que el sensor tiene ruido, tiene rango, y se le pueden inyectar las fallas que de verdad ocurren en planta.</p>
+  <div class="meta-row">
+    <span><b>Prácticas</b> · 7 · tres niveles</span>
+    <span><b>Procesos</b> · 8 modelos físicos</span>
+    <span><b>Fallas</b> · 5 tipos inyectables</span>
+    <span><b>Cadena</b> · MQTT · base temporal · tableros</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contenido">
+  <p class="toc-label">Contenido</p>
+  <ol>
+    <li><a href="#s1"><span>01</span>Qué enseña</a></li>
+    <li><a href="#s2"><span>02</span>Las siete prácticas</a></li>
+    <li><a href="#s3"><span>03</span>El contrato de proceso</a></li>
+    <li><a href="#s4"><span>04</span>El sensor imperfecto</a></li>
+    <li><a href="#s5"><span>05</span>Las cinco fallas</a></li>
+    <li><a href="#s6"><span>06</span>La práctica es un archivo</a></li>
+    <li><a href="#s7"><span>07</span>El catálogo de instrumentos</a></li>
+    <li><a href="#s8"><span>08</span>La cadena de telemetría</a></li>
+    <li><a href="#s9"><span>09</span>Arquitectura</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ══════════════ 1 ══════════════ -->
+<section id="s1">
+  <span class="sec-num">01</span>
+  <h2>Qué enseña</h2>
+  <p class="intro">Un laboratorio de telemetría industrial cuesta decenas de miles de dólares y ocupa una sala. Un estudiante que no ha estado en uno llega a su primer trabajo sabiendo la teoría del control y <strong>sin haber visto nunca un dato de planta</strong>.</p>
+
+  <p>Esta herramienta simula procesos físicos reales, los instrumenta con sensores que se comportan como sensores, y publica sus lecturas por la misma cadena que usa una planta de verdad. El estudiante no ve gráficas bonitas: ve <strong>telemetría</strong>, con lo que eso implica.</p>
+
+  <div class="callout rule">
+    <div class="c-title">La diferencia entre simular un proceso y simular su medición</div>
+    <p>Casi cualquier simulador resuelve la ecuación diferencial y dibuja la curva. Eso enseña el proceso, no el oficio.</p>
+    <p>En planta nadie ve la variable: ve <strong>lo que un instrumento dice de la variable</strong>, con su ruido, su rango saturado, su retardo y, de vez en cuando, su falla. Diagnosticar es distinguir cuándo el proceso cambió de cuándo cambió el sensor — y eso solo se aprende con sensores que fallan.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 2 ══════════════ -->
+<section id="s2">
+  <span class="sec-num">02</span>
+  <h2>Las siete prácticas</h2>
+  <p class="intro">Ordenadas en tres niveles, de un balance de masa a un diagnóstico espectral.</p>
+
+  <div class="tw">
+    <table class="data">
+      <thead><tr><th>#</th><th>Práctica</th><th>Nivel</th><th>Duración</th><th>Qué se aprende</th></tr></thead>
+      <tbody>
+        <tr><td>P01</td><td>Descarga de tanque por orificio</td><td class="num">1</td><td class="num">45 min</td><td>Torricelli: balance de masa y respuesta no lineal</td></tr>
+        <tr><td>P02</td><td>Sistema de bombeo</td><td class="num">2</td><td class="num">45 min</td><td>Curva H-Q y punto de operación</td></tr>
+        <tr><td>P03</td><td>Intercambiador en contracorriente</td><td class="num">2</td><td class="num">45 min</td><td>Transferencia de calor y perfiles de temperatura</td></tr>
+        <tr><td>P04</td><td>Motor de inducción trifásico</td><td class="num">2</td><td class="num">60 min</td><td>Arranque y curva par-velocidad</td></tr>
+        <tr><td>P05</td><td>Control PID de nivel</td><td class="num">3</td><td class="num">60 min</td><td>Sintonización empírica por Ziegler-Nichols</td></tr>
+        <tr><td>P06</td><td>Reactor CSTR isotérmico</td><td class="num">3</td><td class="num">50 min</td><td>Cinética de primer orden en continuo</td></tr>
+        <tr><td>P07</td><td>Análisis de vibración</td><td class="num">3</td><td class="num">50 min</td><td>Diagnóstico espectral de fallas mecánicas</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>La progresión no es por dificultad matemática sino por <strong>qué tiene que hacer el estudiante</strong>: en nivel 1 observa, en nivel 2 interpreta una curva característica, y en nivel 3 <strong>actúa sobre el proceso</strong> — sintoniza un controlador, ajusta un reactor, diagnostica un espectro.</p>
+</section>
+
+<!-- ══════════════ 3 ══════════════ -->
+<section id="s3">
+  <span class="sec-num">03</span>
+  <h2>El contrato de proceso</h2>
+  <p class="intro">Los ocho procesos físicos implementan la misma interfaz mínima. Eso es lo que permite que el resto del sistema no sepa qué está simulando.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">Interfaz de un proceso físico</span></div>
+    <div class="f-eq">step(dt)                    avanza la simulación un paso
+get(variable)               lee una variable de estado
+set_actuador(nombre, valor) actúa sobre el proceso
+
+variables_disponibles()     qué se puede medir
+actuadores_disponibles()    sobre qué se puede actuar</div>
+    <div class="f-note">Los dos últimos permiten que la interfaz se construya sola: la pantalla pregunta al proceso qué expone, en vez de traer una lista escrita a mano que se desactualiza en cuanto alguien añade una variable.</div>
+  </div>
+
+  <p>El método de actuación tiene una implementación vacía por defecto. Un proceso sin actuadores —una descarga por gravedad, por ejemplo— <strong>no tiene que declarar nada</strong>: simplemente no lo sobrescribe. Obligar a todos a implementar un método que la mitad no usa habría llenado el código de cuerpos vacíos.</p>
+
+  <p>Los modelos van desde una ecuación de Torricelli hasta un equivalente eléctrico de motor de inducción con dinámica de rotor, un reactor de tanque agitado y un análisis espectral de vibración.</p>
+</section>
+
+<!-- ══════════════ 4 ══════════════ -->
+<section id="s4">
+  <span class="sec-num">04</span>
+  <h2>El sensor imperfecto</h2>
+  <p class="intro">Un sensor lee una variable del proceso activo, pero <strong>no la devuelve tal cual</strong>. Entre la variable y el dato que llega al estudiante hay tres transformaciones, y las tres son físicas.</p>
+
+  <div class="formula energy">
+    <div class="f-head"><span class="f-name">De la variable al dato</span></div>
+    <div class="f-eq">valor real del proceso
+      + ruido gaussiano de desviación σ
+      → posible falla activa
+      → recorte al rango del instrumento
+      = lectura publicada</div>
+    <div class="f-note">El recorte va al final, después de la falla. Es lo correcto: un transmisor con salida de 4-20 mA <strong>no puede</strong> reportar fuera de su rango, ni siquiera averiado. Aplicarlo antes dejaría escapar valores imposibles.</div>
+  </div>
+
+  <p>Cada sensor declara su <strong>rango</strong>, su <strong>σ de ruido</strong> y su <strong>frecuencia de muestreo</strong>. Los tres son parámetros de la práctica, no constantes del código, así que la misma variable puede medirse con un instrumento preciso y lento o con uno ruidoso y rápido — y el estudiante ve la diferencia sobre el mismo proceso.</p>
+
+  <div class="callout">
+    <div class="c-title">Por qué el ruido no es adorno</div>
+    <p>Sin ruido, cualquier derivada numérica sale limpia y cualquier umbral funciona. Con ruido, el estudiante descubre por su cuenta que <strong>derivar amplifica el ruido</strong> —lección central del término derivativo de un PID— y que un umbral sin histéresis parpadea. Son dos cosas que se explican en clase y solo se entienden cuando le pasan a uno.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 5 ══════════════ -->
+<section id="s5">
+  <span class="sec-num">05</span>
+  <h2>Las cinco fallas</h2>
+  <p class="intro">A cualquier sensor se le puede <strong>inyectar una falla</strong>, con duración opcional. Es la herramienta central del laboratorio: el instructor rompe algo y el estudiante tiene que darse cuenta.</p>
+
+  <div class="tw">
+    <table class="data">
+      <thead><tr><th>Falla</th><th>Qué hace la lectura</th><th>Cómo se ve en planta</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">frozen</span></td><td>Se queda en el último valor leído</td><td>Transmisor colgado. La curva se vuelve una recta horizontal mientras el proceso sigue moviéndose</td></tr>
+        <tr><td><span class="mono">drift</span></td><td>Se aleja del valor real de forma <b>creciente con el tiempo</b></td><td>Deriva de calibración. La más difícil de detectar: al principio es indistinguible de un cambio real</td></tr>
+        <tr><td><span class="mono">out_of_range</span></td><td>Salta un 75 % del span del instrumento</td><td>Falla de acondicionamiento. Evidente, pero obliga a decidir si se descarta el dato o la lectura entera</td></tr>
+        <tr><td><span class="mono">noise</span></td><td>Ruido con diez veces la desviación normal</td><td>Problema de apantallamiento o tierra. La señal sigue siendo correcta en promedio</td></tr>
+        <tr><td><span class="mono">signal_loss</span></td><td>No devuelve nada</td><td>Cable cortado. Obliga a distinguir «cero» de «sin dato», que es la confusión más cara en telemetría</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout rule">
+    <div class="c-title">La deriva es la que enseña de verdad</div>
+    <p>Las otras cuatro se ven. La deriva crece despacio desde el instante en que se inyecta, así que durante los primeros minutos <strong>es una lectura perfectamente creíble</strong>: sin discontinuidad, sin ruido raro, sin valor imposible.</p>
+    <p>Es exactamente el fallo que en planta pasa meses sin detectarse y que termina descubriéndose porque los balances no cierran. Un laboratorio que solo simula fallas evidentes enseña a mirar la alarma; este enseña a desconfiar del dato.</p>
+  </div>
+
+  <p>La falla puede llevar duración, y al vencerse el sensor vuelve solo a su comportamiento normal. Eso permite montar un escenario que se degrada y se recupera sin que nadie intervenga a mitad del ejercicio.</p>
+</section>
+
+<!-- ══════════════ 6 ══════════════ -->
+<section id="s6">
+  <span class="sec-num">06</span>
+  <h2>La práctica es un archivo</h2>
+  <p class="intro">Una práctica no se programa: <strong>se declara</strong>. Son tres archivos y ninguno es código.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">Anatomía de una práctica</span></div>
+    <div class="f-eq">practica.yaml   objetivos · nivel · duración
+                proceso y sus parámetros físicos
+                sensores con rango, σ, frecuencia,
+                  posición en el diagrama y
+                  referencia al instrumento real
+guia.md         el enunciado que sigue el estudiante
+diagrama.svg    el P&ID sobre el que se ubican los sensores</div>
+    <div class="f-note">Cada sensor lleva su <strong>posición en el diagrama</strong>, así que la lectura en vivo aparece sobre el punto del esquema donde estaría el instrumento. El estudiante no traduce entre una tabla de números y un plano: los ve juntos.</div>
+  </div>
+
+  <p>Los sensores se identifican con nomenclatura de instrumentación —<span class="mono">LT_001</span> para un transmisor de nivel, por ejemplo—, que es la que el estudiante va a encontrar en cualquier plano de planta.</p>
+
+  <div class="callout">
+    <div class="c-title">Qué gana el sistema con esto</div>
+    <p>Añadir una práctica nueva es escribir un YAML, una guía y un diagrama. <strong>No se toca el generador, ni el transporte, ni la interfaz.</strong> Un docente puede crear un ejercicio para su curso sin escribir Python, siempre que el proceso físico que necesita ya exista.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 7 ══════════════ -->
+<section id="s7">
+  <span class="sec-num">07</span>
+  <h2>El catálogo de instrumentos</h2>
+  <p class="intro">Cada sensor de una práctica apunta a una ficha del catálogo. Y esa ficha no es decorativa: es <strong>material de selección de instrumentación</strong>.</p>
+
+  <div class="tw">
+    <table class="data">
+      <thead><tr><th>Campo</th><th>Ejemplo de lo que enseña</th></tr></thead>
+      <tbody>
+        <tr><td>Principio de medición</td><td>Radar de onda guiada, vórtice, efecto Hall, RTD, piezoeléctrico…</td></tr>
+        <tr><td>Rango y precisión típicos</td><td>Qué se puede esperar del instrumento en la realidad</td></tr>
+        <tr><td><b>Ventajas</b></td><td>Sin contacto con el fluido; inmune a vapor, polvo y espuma</td></tr>
+        <tr><td><b>Limitaciones</b></td><td>Costo elevado; requiere calibración inicial</td></tr>
+        <tr><td>Marcas de referencia</td><td>Los fabricantes que el estudiante verá en un catálogo real</td></tr>
+        <tr><td>Norma aplicable</td><td>La referencia técnica que respalda el instrumento</td></tr>
+        <tr><td>Imagen</td><td>Cómo se ve el aparato físico</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout rule">
+    <div class="c-title">Limitaciones y no solo ventajas</div>
+    <p>Que cada ficha declare <strong>qué tiene de malo</strong> el instrumento es la parte que un catálogo comercial nunca trae. Seleccionar instrumentación es elegir entre compromisos —precisión contra costo, robustez contra mantenimiento—, y un estudiante que solo ha leído ventajas no ha aprendido a elegir.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 8 ══════════════ -->
+<section id="s8">
+  <span class="sec-num">08</span>
+  <h2>La cadena de telemetría</h2>
+  <p class="intro">Las lecturas no se dibujan directamente: <strong>recorren la misma cadena que en una planta</strong>. Ese recorrido es tan parte del ejercicio como el proceso.</p>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">El camino del dato</span></div>
+    <div class="f-eq">proceso → sensor → publicador MQTT
+                          │
+              corredor de mensajes
+                          │
+        suscriptor → base de datos temporal → tableros</div>
+    <div class="f-note">Y la jerarquía de temas reproduce la de una planta real: <span class="mono">planta / área / sensor</span>. El mismo árbol sirve para publicar la medición y para <strong>recibir órdenes de control</strong>, que es como funciona la telemetría bidireccional de verdad.</div>
+  </div>
+
+  <p>El corredor de mensajes es <strong>opcional</strong>: si no está configurado, el generador detecta que no hay que publicar y sigue funcionando. Un estudiante puede correr la práctica en su portátil sin levantar la infraestructura completa, y el docente puede montarla entera cuando el objetivo del día es precisamente la cadena.</p>
+
+  <p>Al terminar, el sistema genera un <strong>informe en PDF</strong> de la sesión. Cierra el ciclo del oficio: en planta, un ensayo que no produce un informe no ocurrió.</p>
+</section>
+
+<!-- ══════════════ 9 ══════════════ -->
+<section id="s9">
+  <span class="sec-num">09</span>
+  <h2>Arquitectura</h2>
+
+  <div class="formula">
+    <div class="f-head"><span class="f-name">Estructura</span></div>
+    <div class="f-eq">generador/
+    procesos/       8 modelos físicos tras una interfaz común
+    sensores/       ruido, rango e inyección de fallas
+    instrumentos/   catálogo con fichas e imágenes
+    practicas/      7 prácticas declaradas en YAML
+    reportes/       generación del informe en PDF
+    publicador · suscriptor
+frontend/           interfaz de la sesión
+grafana/  mosquitto/  configuración de la infraestructura</div>
+    <div class="f-note">Los procesos y los sensores no dependen del transporte ni de la interfaz: reciben números y devuelven números. Es lo que permite probarlos sin levantar corredor ni base de datos.</div>
+  </div>
+
+  <h3>Verificación</h3>
+  <p>Las pruebas se concentran en los modelos físicos y en el registro de prácticas, que es donde un error no se nota: una curva equivocada sigue siendo una curva creíble.</p>
+
+  <div class="callout">
+    <div class="c-title">Un caso real de por qué eso importa</div>
+    <p>El modelo del motor de inducción calculaba el par con la corriente total del estator en vez de la del rotor. Al acercarse a la velocidad síncrona el par tendía a infinito en lugar de a cero, así que el motor nunca alcanzaba el equilibrio: <strong>aplicarle carga lo aceleraba</strong>.</p>
+    <p>El modelo devolvía números plausibles y la curva se veía razonable. Lo detectó la prueba que verifica lo obvio —que la carga frena— y no la inspección visual. Corregido, el motor arranca con quince veces la corriente de vacío y con carga baja de velocidad, que es lo que hace un motor real.</p>
+  </div>
+
+  <p>El entorno completo se levanta con contenedores: corredor de mensajes, base de datos temporal, tableros, generador y suscriptor.</p>
+</section>
+
+</main>
+
+<footer>
+    <div class="sello">
+    <svg class="sello-marca" viewBox="0 0 100 100" role="img" aria-label="Sello de autoría de Geovani Lozano">
+      <rect width="100" height="100" rx="19" fill="#0F172A"/>
+      <text x="50" y="47" text-anchor="middle" dominant-baseline="central"
+            font-family="Archivo, Helvetica Neue, Arial, sans-serif" font-weight="700"
+            font-size="42" letter-spacing="-1" fill="#FFFFFF">GL</text>
+      <rect x="34" y="70" width="32" height="7" rx="3.5" fill="#F59E0B"/>
+    </svg>
+    <div class="sello-txt">
+      <p class="sello-nombre">Geovani Lozano</p>
+      <p class="sello-rol">Ingeniero Electromecánico · MSc en Ingeniería Matemática y Computacional</p>
+      <p class="sello-nota">Documento técnico · Simulador de Telemetría Industrial · 2026</p>
+    </div>
+  </div>
+<p>Documento técnico · Simulador de Telemetría Industrial</p>
+  <p>Elaborado a partir del código de los modelos, los sensores y las prácticas.</p>
+</footer>
+
+</div>
+
+<button class="theme-toggle" id="tt" type="button" aria-label="Cambiar tema">
+  <span class="tt-ico" aria-hidden="true">☾</span><span id="tt-txt">Modo oscuro</span>
+</button>
+
+<script>
+(function () {
+  var raiz = document.documentElement, boton = document.getElementById('tt'), texto = document.getElementById('tt-txt');
+  var guardado = null;
+  try { guardado = localStorage.getItem('simulador-tema'); } catch (e) {}
+  var oscuro = guardado ? guardado === 'dark'
+                        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  function pintar() {
+    raiz.setAttribute('data-theme', oscuro ? 'dark' : 'light');
+    texto.textContent = oscuro ? 'Modo claro' : 'Modo oscuro';
+    boton.querySelector('.tt-ico').textContent = oscuro ? '☀' : '☾';
+  }
+  pintar();
+  boton.addEventListener('click', function () {
+    oscuro = !oscuro;
+    try { localStorage.setItem('simulador-tema', oscuro ? 'dark' : 'light'); } catch (e) {}
+    pintar();
+  });
+})();
+</script>
+
+</body>
+</html>
